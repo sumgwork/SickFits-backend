@@ -25,8 +25,10 @@ const Mutation = {
       },
       info
     );
-
-    return item;
+  },
+  deleteItem(parent, args, ctx, info) {
+    //TODO: check if user is logged in
+    return ctx.db.mutation.deleteItem({ where: { id: args.id } }, info);
   }
 };
 
