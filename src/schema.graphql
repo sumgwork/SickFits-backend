@@ -10,6 +10,7 @@ type Mutation {
   ): Item!
   updateItem(id: ID!, title: String, description: String, price: Int): Item!
   deleteItem(id: ID!): Item
+  signup(email: String!, password: String!, name: String!): User!
 }
 
 type Query {
@@ -17,11 +18,9 @@ type Query {
     where: ItemWhereInput
     orderBy: ItemOrderByInput
     skip: Int
-    after: String
-    before: String
     first: Int
-    last: Int
   ): [Item]!
   item(where: ItemWhereUniqueInput!): Item
   itemsConnection(where: ItemWhereInput): ItemConnection!
+  users: [User]!
 }
