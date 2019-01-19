@@ -10,7 +10,7 @@ const server = createServer();
 //Using express middleware to handle cookies (JWT)
 server.express.use(cookieParser());
 
-//TODO - Use express middleware to populate current user
+//Using express middleware to populate current user on request
 server.express.use((req, res, next) => {
   const { token } = req.cookies;
 
@@ -18,6 +18,17 @@ server.express.use((req, res, next) => {
     const { userId } = jwt.verify(token, process.env.APP_SECRET);
     req.userId = userId;
   }
+  next();
+});
+
+//Another express middleware to populate user object on each request
+server.express.use(async (req, res, next) => {
+  if (!req.userId) return next();
+  const user = await db.query.user(
+    { where: { id: req.userId } },
+    "{id,permissions,name,email}"
+  );
+  req.user = user;
   next();
 });
 
