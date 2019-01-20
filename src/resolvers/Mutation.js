@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { randomBytes } = require("crypto"); //library provided by node
 const { transport, makeANiceEmail } = require("../mail");
+const { hasPermission } = require("../utils");
 
 const Mutation = {
   async createItem(parent, args, ctx, info) {
@@ -50,7 +51,14 @@ const Mutation = {
       },
       `{ id title }`
     );
-    // 2. Check if user has permission to delete
+    // 2. Check if user has permission to delete or owns the items
+    const ownsItem = item.user === ctx.request.userId;
+    const isAllowed = ctx.request.user.permissions.some(permission =>
+      ["ADMIN", "ITEMDELETE"].includes(permission)
+    );
+    if (!ownsItem && !isAllowed) {
+      throw new Error("You don't have permissions to do that!");
+    }
 
     // 3. Delete the item
     return ctx.db.mutation.deleteItem({ where: { id: args.id } }, info);
@@ -193,6 +201,31 @@ const Mutation = {
     });
     // 8. return user
     return updatedUser;
+  },
+
+  async updatePermissions(parent, args, ctx, info) {
+    //1. Check if user is logged in
+    if (!ctx.request.userId) {
+      throw new Error("User not logged in!");
+    }
+    //2. Query the current user
+    const user = ctx.request.user;
+    //3. Check if user has permissions to update
+    hasPermission(user, ["ADMIN", "PERMISSIONUPDATE"]);
+    //4. Update the permissions
+    return ctx.db.mutation.updateUser(
+      {
+        data: {
+          permissions: {
+            set: args.permissions // to be done this way because permissions is an enum
+          }
+        },
+        where: {
+          id: args.userId
+        }
+      },
+      info
+    );
   }
 };
 
