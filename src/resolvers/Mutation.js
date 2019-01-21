@@ -261,6 +261,35 @@ const Mutation = {
       }
     });
     //5. Return cartitem
+  },
+
+  async removeFromCart(parent, args, ctx, info) {
+    //1. Get item from the cart
+    const cartItem = await ctx.db.query.cartItem(
+      {
+        where: {
+          id: args.id
+        }
+      },
+      `{id, user {id}}`
+    );
+    if (!cartItem) {
+      throw new Error("Item does not exist in cart");
+    }
+    //2. Check if user owns this item
+    if (cartItem.user.id !== ctx.request.userId) {
+      throw new Error("You are not permitted to do that");
+    }
+
+    //3. remove the item
+    ctx.db.mutation.deleteCartItem(
+      {
+        where: {
+          id: args.id
+        }
+      },
+      info
+    );
   }
 };
 
