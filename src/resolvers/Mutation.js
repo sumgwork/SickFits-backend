@@ -277,12 +277,12 @@ const Mutation = {
       throw new Error("Item does not exist in cart");
     }
     //2. Check if user owns this item
-    if (cartItem.user.id !== ctx.request.userId) {
-      throw new Error("You are not permitted to do that");
-    }
+    // if (cartItem.user.id !== ctx.request.userId) {
+    //   throw new Error("You are not permitted to do that");
+    // }
 
     //3. remove the item
-    ctx.db.mutation.deleteCartItem(
+    return ctx.db.mutation.deleteCartItem(
       {
         where: {
           id: args.id
