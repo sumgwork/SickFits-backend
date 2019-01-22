@@ -1,5 +1,5 @@
 # source: https://us1.prisma.sh/sumit-govil/sick-fits/dev
-# timestamp: Sun Jan 20 2019 22:34:49 GMT+1100 (AEDT)
+# timestamp: Tue Jan 22 2019 23:07:28 GMT+1100 (AEDT)
 
 type AggregateCartItem {
   count: Int!
@@ -21,7 +21,7 @@ type BatchPayload {
 type CartItem implements Node {
   id: ID!
   user: User!
-  item: Item!
+  item: Item
   count: Int!
 }
 
@@ -38,7 +38,7 @@ type CartItemConnection {
 input CartItemCreateInput {
   count: Int
   user: UserCreateOneWithoutCartInput!
-  item: ItemCreateOneInput!
+  item: ItemCreateOneInput
 }
 
 input CartItemCreateManyWithoutUserInput {
@@ -48,7 +48,7 @@ input CartItemCreateManyWithoutUserInput {
 
 input CartItemCreateWithoutUserInput {
   count: Int
-  item: ItemCreateOneInput!
+  item: ItemCreateOneInput
 }
 
 """An edge in a connection."""
@@ -191,7 +191,7 @@ input CartItemSubscriptionWhereInput {
 input CartItemUpdateInput {
   count: Int
   user: UserUpdateOneRequiredWithoutCartInput
-  item: ItemUpdateOneRequiredInput
+  item: ItemUpdateOneInput
 }
 
 input CartItemUpdateManyDataInput {
@@ -221,7 +221,7 @@ input CartItemUpdateManyWithWhereNestedInput {
 
 input CartItemUpdateWithoutUserDataInput {
   count: Int
-  item: ItemUpdateOneRequiredInput
+  item: ItemUpdateOneInput
 }
 
 input CartItemUpdateWithWhereUniqueWithoutUserInput {
@@ -450,9 +450,11 @@ input ItemUpdateManyMutationInput {
   price: Int
 }
 
-input ItemUpdateOneRequiredInput {
+input ItemUpdateOneInput {
   create: ItemCreateInput
   connect: ItemWhereUniqueInput
+  disconnect: Boolean
+  delete: Boolean
   update: ItemUpdateDataInput
   upsert: ItemUpsertNestedInput
 }

@@ -31,6 +31,6 @@ type Item {
 type CartItem {
   id: ID! @unique
   user: User!
-  item: Item!
+  item: Item
   count: Int! @default(value: 1)
 }
