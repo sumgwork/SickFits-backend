@@ -34,3 +34,22 @@ type CartItem {
   item: Item
   count: Int! @default(value: 1)
 }
+
+type OrderItem {
+  id: ID! @unique
+  title: String!
+  description: String!
+  image: String
+  largeImage: String
+  price: Int!
+  count: Int! @default(value: 1)
+  user: User
+}
+
+type Order {
+  id: ID! @unique
+  items: [OrderItem!]!
+  total: Int!
+  user: User!
+  charge: String!
+}

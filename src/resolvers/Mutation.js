@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const { randomBytes } = require("crypto"); //library provided by node
 const { transport, makeANiceEmail } = require("../mail");
 const { hasPermission } = require("../utils");
+const stripe = require("../stripe");
 
 const Mutation = {
   async createItem(parent, args, ctx, info) {
@@ -290,6 +291,64 @@ const Mutation = {
       },
       info
     );
+  },
+
+  async createOrder(parent, args, ctx, info) {
+    //1. Check if user is logged in
+    const userId = ctx.request.userId;
+    if (!userId) {
+      throw new Error("User must be logged in!");
+    }
+    const user = await ctx.db.query.user(
+      { where: { id: userId } },
+      `{id name email cart { id count item {title description id price image largeImage }}}`
+    );
+
+    //2. get and verify cart total
+    const amount = user.cart.reduce(
+      (tally, cartItem) => cartItem.item.price * cartItem.count + tally,
+      0
+    );
+
+    //3. charge the card
+    const charge = await stripe.charges.create({
+      amount,
+      currency: "AUD",
+      source: args.token
+    });
+
+    //4. convert cartitem to orderitem
+    const orderItems = user.cart.map(cartItem => {
+      const orderItem = {
+        ...cartItem.item,
+        count: cartItem.count,
+        user: { connect: { id: userId } }
+      };
+      delete orderItem.id;
+      return orderItem;
+    });
+
+    console.log("OrderItems", orderItems);
+    //5. create order
+    const order = await ctx.db.mutation.createOrder({
+      data: {
+        charge: charge.id,
+        total: charge.amount,
+        items: { create: orderItems },
+        user: { connect: { id: userId } }
+      }
+    });
+
+    //6. remove cart items from current cart
+    const cartItemIds = user.cart.map(cartItem => cartItem.id);
+    await ctx.db.mutation.deleteManyCartItems({
+      where: {
+        id_in: cartItemIds
+      }
+    });
+
+    //7. return order
+    return order;
   }
 };
 
