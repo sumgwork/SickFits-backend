@@ -28,6 +28,29 @@ const Query = {
       },
       info
     );
+  },
+
+  async order(parent, args, ctx, info) {
+    //1. Check if user is logged in
+    if (!ctx.request.userId) {
+      throw new Error("No logged in user");
+    }
+
+    //2. Fetch order from DB
+    const order = await ctx.db.query.order({ where: { id: args.id } }, info);
+    console.log("order", order);
+    if (!order) {
+      throw new Error("No order found with this ID");
+    }
+    //3. Check is user has the permission to view this order
+    const isOwner = ctx.request.userId === order.user.id;
+    const hasPermission = ctx.request.user.permissions.includes(["ADMIN"]);
+    if (!isOwner && !hasPermission) {
+      throw new Error("No sufficient priveledge");
+    }
+
+    //4. Return order
+    return order;
   }
 };
 
