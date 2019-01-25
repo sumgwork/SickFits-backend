@@ -38,7 +38,6 @@ const Query = {
 
     //2. Fetch order from DB
     const order = await ctx.db.query.order({ where: { id: args.id } }, info);
-    console.log("order", order);
     if (!order) {
       throw new Error("No order found with this ID");
     }
@@ -51,6 +50,19 @@ const Query = {
 
     //4. Return order
     return order;
+  },
+
+  async orders(parent, args, ctx, info) {
+    const { userId } = ctx.request;
+    if (!userId) {
+      return null;
+    }
+    return ctx.db.query.orders(
+      {
+        where: { user: { id: userId } }
+      },
+      info
+    );
   }
 };
 
