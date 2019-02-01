@@ -328,7 +328,6 @@ const Mutation = {
       return orderItem;
     });
 
-    console.log("OrderItems", orderItems);
     //5. create order
     const order = await ctx.db.mutation.createOrder({
       data: {
