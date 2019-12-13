@@ -32,5 +32,8 @@
     "presets": [
       "env"
     ]
+  },
+  "devDependencies": {
+    "jest": "^24.9.0"
   }
 }
